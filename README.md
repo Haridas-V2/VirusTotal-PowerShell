@@ -18,7 +18,7 @@ It's a simple PowerShell Script which usages VirusTotal API to autmate reputatio
 
 ![image](https://user-images.githubusercontent.com/62739088/214581531-d8ecce44-2d54-4a42-bc88-fffada3af872.png)
 
-![image](https://user-images.githubusercontent.com/62739088/214581564-017fd9e4-03f2-4d3d-b7a5-a6c204f84880.png)
+![image](https://user-images.githubusercontent.com/62739088/214582137-e9fdeb68-8b09-485a-9b8f-d708f4c5b151.png)
 
 ![image](https://user-images.githubusercontent.com/62739088/214581593-1567e740-0495-48d7-8d83-1dd365dddab4.png)
 
