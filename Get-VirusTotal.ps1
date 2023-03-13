@@ -86,24 +86,36 @@ Get-VirusTotalIP -VT_APIKEY "xkksdfkskxkdjkld" -IP_TextFile c:\temp\ip_list.txt 
         Write-Host "You must either provide IP or text file with ip list" -ForegroundColor Red
         Exit;
     }
+                      
+    #Get vt url and ip result
+    $vt_ip_url = "https://www.virustotal.com/api/v3/ip_addresses/"
 
-    try {                    
-        #Get vt url and ip result
-        $vt_ip_url = "https://www.virustotal.com/api/v3/ip_addresses/"
+    $headers = @{    
+        "Accept"   = "application/json"
+        "x-apikey" = $VT_APIKEY
+    }
 
-        $headers = @{    
-            "Accept"   = "application/json"
-            "x-apikey" = $VT_APIKEY
+    $vt_ip_report = @()
+
+    foreach ( $ip in $IP_list ) {
+        write-host working on $ip -ForegroundColor Green
+        $url = $vt_ip_url + $IP 
+            
+        $virusTotalResult = ""
+        $virusTotalResult = Invoke-RestMethod -Uri $url -Method 'Get'  -Headers $headers
+
+        if (!$virusTotalResult) {
+            $ip_report = [PSCustomObject]@{
+                IP         = $IP
+                country    = "Failed to get Data"
+                as_owner   = ""
+                harmless   = ""
+                malicious  = ""
+                suspicious = ""
+                undetected = ""
+            }
         }
-
-        $vt_ip_report = @()
-
-        foreach ( $ip in $IP_list ) {
-            write-host working on $ip -ForegroundColor Green
-            $url = $vt_ip_url + $IP 
-
-            $virusTotalResult = Invoke-RestMethod -Uri $url -Method 'Get'  -Headers $headers
-
+        else {
             $ip_report = [PSCustomObject]@{
                 IP         = $IP
                 country    = $virusTotalResult.data.attributes.country
@@ -113,15 +125,12 @@ Get-VirusTotalIP -VT_APIKEY "xkksdfkskxkdjkld" -IP_TextFile c:\temp\ip_list.txt 
                 suspicious = $virusTotalResult.data.attributes.last_analysis_stats.suspicious
                 undetected = $virusTotalResult.data.attributes.last_analysis_stats.undetected
             }
-            $vt_ip_report += $ip_report
         }
-        return $vt_ip_report
+        $vt_ip_report += $ip_report
     }
-    catch {
-        Write-Host "$($_.Exception.Message) - please check if VT address is correct or you have valid API key" -BackgroundColor DarkRed
-        break
-    }
+    return $vt_ip_report
 }
+   
 
 #======================= Get-VirusTotalDomain ==================#
 function Get-VirusTotalDomain {
@@ -178,24 +187,37 @@ Get-VirusTotalDomain -VT_APIKEY "xkksdfkskxkdjkld" -Domain_TextFile c:\temp\doma
         Write-Host "You must either provide Domain or text file with Domain list" -ForegroundColor Red
         Exit;
     }
+    
+    $vt_domain_url = "https://www.virustotal.com/api/v3/domains/"
 
-    try {                    
-        #Get vt url and ip result
-        $vt_domain_url = "https://www.virustotal.com/api/v3/domains/"
+    $headers = @{    
+        "Accept"   = "application/json"
+        "x-apikey" = $VT_APIKEY
+    }
 
-        $headers = @{    
-            "Accept"   = "application/json"
-            "x-apikey" = $VT_APIKEY
-        }
+    $vt_domain_report = @()
 
-        $vt_domain_report = @()
+    foreach ( $Domain in $Domain_list ) {
+        write-host working on $Domain -ForegroundColor Green
+        $url = $vt_domain_url + $Domain 
 
-        foreach ( $Domain in $Domain_list ) {
-            write-host working on $Domain -ForegroundColor Green
-            $url = $vt_domain_url + $Domain 
-
-            $virusTotalResult = Invoke-RestMethod -Uri $url -Method 'Get'  -Headers $headers
+        $virusTotalResult = ""
+        $virusTotalResult = Invoke-RestMethod -Uri $url -Method 'Get'  -Headers $headers
             
+        if (!$virusTotalResult) {
+            $domain_report = [PSCustomObject]@{
+                Domain        = $domain
+                harmless      = "Failed to get data"
+                malicious     = ""
+                suspicious    = ""
+                undetected    = ""
+                category      = ""
+                creation_date = ""
+                whois_date    = ""
+                whois         = ""
+            } 
+        }
+        else {
             $domain_report = [PSCustomObject]@{
                 Domain        = $domain
                 harmless      = $virusTotalResult.data.attributes.last_analysis_stats.harmless
@@ -207,14 +229,10 @@ Get-VirusTotalDomain -VT_APIKEY "xkksdfkskxkdjkld" -Domain_TextFile c:\temp\doma
                 whois_date    = (Get-Date 01.01.1970) + ([System.TimeSpan]::fromseconds($virustotalResult.data.attributes.whois_date))
                 whois         = $virustotalResult.data.attributes.whois    
             }
-            $vt_domain_report += $domain_report            
         }
-        return $vt_domain_report        
+        $vt_domain_report += $domain_report            
     }
-    catch {
-        Write-Host "$($_.Exception.Message) - please check if VT address is correct or you have valid API key" -BackgroundColor DarkRed
-        break
-    }
+    return $vt_domain_report       
 }
 
 #======================= Get-VirusTotalUrl ==================#
@@ -275,28 +293,40 @@ Get-VirusTotalUrl -VT_APIKEY "xkksdfkskxkdjkld" -Url_TextFile c:\temp\url_list.t
         Write-Host "You must either provide Domain or text file with website url list" -ForegroundColor Red
         Exit;
     }
+                      
+    #Get vt url and ip result        
+    $vt_url_url = "https://www.virustotal.com/api/v3/urls"
 
-    try {                    
-        #Get vt url and ip result        
-        $vt_url_url = "https://www.virustotal.com/api/v3/urls"
+    $headers = @{    
+        "Accept"   = "application/json"
+        "x-apikey" = $VT_APIKEY            
+    }
 
-        $headers = @{    
-            "Accept"   = "application/json"
-            "x-apikey" = $VT_APIKEY            
+    $vt_url_report = @()
+
+    foreach ( $url_address in $url_list ) {
+        write-host working on $url_address -ForegroundColor Green
+            
+        $Bytes = [Text.Encoding]::UTF8.GetBytes($url_address)
+        $base64url = ([Convert]::ToBase64String($Bytes)).split("=")
+
+        $url = $vt_url_url + "/" + $base64url
+        $virusTotalResult = ""    
+        $virusTotalResult = Invoke-RestMethod -Uri $url -Method GET -Headers $headers
+        
+        if (!$virusTotalResult) {
+            $url_report = [PSCustomObject]@{
+                url                = $virusTotalResult.data.attributes.url
+                harmless           = "Failed to get data"
+                malicious          = ""
+                suspicious         = ""
+                undetected         = ""
+                category           = ""
+                last_analysis_date = ""
+                title              = ""
+            }
         }
-
-        $vt_url_report = @()
-
-        foreach ( $url_address in $url_list ) {
-            write-host working on $url_address -ForegroundColor Green
-            
-            $Bytes = [Text.Encoding]::UTF8.GetBytes($url_address)
-            $base64url = ([Convert]::ToBase64String($Bytes)).split("=")
-
-            $url = $vt_url_url + "/" + $base64url
-            
-            $virusTotalResult = Invoke-RestMethod -Uri $url -Method GET -Headers $headers
-            
+        else {
             $url_report = [PSCustomObject]@{
                 url                = $virusTotalResult.data.attributes.url
                 harmless           = $virusTotalResult.data.attributes.last_analysis_stats.harmless
@@ -307,14 +337,10 @@ Get-VirusTotalUrl -VT_APIKEY "xkksdfkskxkdjkld" -Url_TextFile c:\temp\url_list.t
                 last_analysis_date = (Get-Date 01.01.1970) + ([System.TimeSpan]::fromseconds($virustotalResult.data.attributes.last_analysis_date))      
                 title              = $virusTotalResult.data.attributes.title
             }
-            $vt_url_report += $url_report            
         }
-        return $vt_url_report        
+        $vt_url_report += $url_report            
     }
-    catch {
-        Write-Host "$($_.Exception.Message) - please check if VT address is correct or you have valid API key" -BackgroundColor DarkRed
-        break
-    }
+    return $vt_url_report  
 }
 
 #======================= Submit-VirusTotalUrl ==================#
@@ -371,39 +397,44 @@ https://yahoo.com
         Exit;
     }
 
-    try {                    
-        #Get vt url and ip result        
-        $vt_url_url = "https://www.virustotal.com/api/v3/urls"
+                       
+    #Get vt url and ip result        
+    $vt_url_url = "https://www.virustotal.com/api/v3/urls"
 
-        $headers = @{    
-            "Accept"   = "application/json"
-            "x-apikey" = $VT_APIKEY
-            "content-type" = "application/x-www-form-urlencoded" 
-        }
+    $headers = @{    
+        "Accept"       = "application/json"
+        "x-apikey"     = $VT_APIKEY
+        "content-type" = "application/x-www-form-urlencoded" 
+    }
 
-        $vt_url_report = @()
+    $vt_url_report = @()
 
-        foreach ( $url_address in $url_list ) {
-            write-host working on $url_address -ForegroundColor Green
+    foreach ( $url_address in $url_list ) {
+        write-host working on $url_address -ForegroundColor Green
                         
-            #Submit url to vt for scan
-            $url = $vt_url_url
-            $Form = @{ 'url' = $url_address }                                    
-            $virusTotalResult = Invoke-RestMethod -Uri $url -Method POST -Headers $headers -ContentType 'application/x-www-form-urlencoded' -Body $Form
-                                                
+        #Submit url to vt for scan
+        $url = $vt_url_url
+        $Form = @{ 'url' = $url_address }
+        $virusTotalResult = ""                                    
+        $virusTotalResult = Invoke-RestMethod -Uri $url -Method POST -Headers $headers -ContentType 'application/x-www-form-urlencoded' -Body $Form
+        
+        if (!$virusTotalResult) {
             $url_report = [PSCustomObject]@{
-                url                = $url_address
-                type                = $virusTotalResult.data.type
-                id           = $virusTotalResult.data.id              
+                url  = $url_address
+                type = "Failed to Submit URL"
+                id   = ""             
             }
-            $vt_url_report += $url_report            
         }
-        return $vt_url_report        
+        else {
+            $url_report = [PSCustomObject]@{
+                url  = $url_address
+                type = $virusTotalResult.data.type
+                id   = $virusTotalResult.data.id              
+            }
+        }
+        $vt_url_report += $url_report            
     }
-    catch {
-        Write-Host "$($_.Exception.Message) - please check if VT address is correct or you have valid API key" -BackgroundColor DarkRed
-        break
-    }
+    return $vt_url_report     
 }
 
 #============================== Get VirusTotal File ==============================#
@@ -420,7 +451,7 @@ Date - 19-Jan-2023
 Get-VirusTotalFile -VT_APIKEY "xkksdfkskxkdjkld" -FileHash "sdfasdfasd34534fsdf"
 
 .Example
-Get-VirusTotalFile -VT_APIKEY "xkksdfkskxkdjkld" -FileHash c:\temp\FileHash_list.txt
+Get-VirusTotalFile -VT_APIKEY "xkksdfkskxkdjkld" -FileHash_list c:\temp\FileHash_list.txt
 
 Create a text file with One IP at each line and save it. e.g.
 sdfasdfasd34534fsdfsdtfhg
@@ -428,7 +459,7 @@ sdfasdfasd34534fsdfsdfasd
 
 .Example
 Get File reputation from Virus Total and save report to file.
-Get-VirusTotalFile -VT_APIKEY "xkksdfkskxkdjkld" -FileHash c:\temp\FileHash_list.txt | Export-Csv -NoTypeInformation -Path c:\temp\ip_report.csv
+Get-VirusTotalFile -VT_APIKEY "xkksdfkskxkdjkld" -FileHash_list c:\temp\FileHash_list.txt | Export-Csv -NoTypeInformation -Path c:\temp\ip_report.csv
 
 #>
     [CmdletBinding()]
@@ -458,48 +489,63 @@ Get-VirusTotalFile -VT_APIKEY "xkksdfkskxkdjkld" -FileHash c:\temp\FileHash_list
         Write-Host "You must either provide File Hash or text file with File Hash" -ForegroundColor Red
         Exit;
     }
+                      
+    #Get vt url and ip result
+    $vt_ip_url = "https://www.virustotal.com/api/v3/files/"
 
-    try {                    
-        #Get vt url and ip result
-        $vt_ip_url = "https://www.virustotal.com/api/v3/files/"
+    $headers = @{    
+        "Accept"   = "application/json"
+        "x-apikey" = $VT_APIKEY
+    }
 
-        $headers = @{    
-            "Accept"   = "application/json"
-            "x-apikey" = $VT_APIKEY
-        }
+    $file_hash_report = @()
 
-        $file_hash_report = @()
-
-        foreach ( $FileHash in $FileHash_list ) {
-            write-host working on $FileHash -ForegroundColor Green
-            $url = $vt_ip_url + $FileHash 
-
-            $virusTotalResult = Invoke-RestMethod -Uri $url -Method 'Get'  -Headers $headers
-
+    foreach ( $FileHash in $FileHash_list ) {
+        write-host working on $FileHash -ForegroundColor Green
+        $url = $vt_ip_url + $FileHash 
+        Write-Host this is the url $url -ForegroundColor Yellow
+        
+        $virusTotalResult = ""        
+        $virusTotalResult = Invoke-RestMethod -Uri $url -Method 'Get'  -Headers $headers
+               
+        if (!$virusTotalResult) {            
+            write-host "Failed to get data from url" -ForegroundColor Red
             $filehash_report = [PSCustomObject]@{
-                FileHash         = $FileHash
-                meaningful_name =  $virusTotalResult.data.attributes.meaningful_name
-                type_description = $virusTotalResult.data.attributes.type_description
-                last_analysis_date =  (Get-Date 01.01.1970) + ([System.TimeSpan]::fromseconds($virusTotalResult.data.attributes.last_analysis_date))
-                harmless   = $virusTotalResult.data.attributes.last_analysis_stats.harmless
-                malicious  = $virusTotalResult.data.attributes.last_analysis_stats.malicious
-                suspicious = $virusTotalResult.data.attributes.last_analysis_stats.suspicious
-                undetected = $virusTotalResult.data.attributes.last_analysis_stats.undetected
-                sha256 = $virusTotalResult.data.attributes.sha256
-                sha1 = $virusTotalResult.data.attributes.sha1
-                md5 = $virusTotalResult.data.attributes.md5
-                fileSizeKB = ($virusTotalResult.data.attributes.size/1KB)
-                
-            }
-            $file_hash_report += $filehash_report
+                FileHash           = $FileHash
+                meaningful_name    = "Failed to Get Data"
+                type_description   = ""
+                last_analysis_date = ""
+                harmless           = ""
+                malicious          = ""
+                suspicious         = ""
+                undetected         = ""
+                sha256             = ""
+                sha1               = ""
+                md5                = ""
+                fileSizeKB         = ""
+            }            
         }
-        return $file_hash_report
+        else {            
+            $filehash_report = [PSCustomObject]@{
+                FileHash           = $FileHash
+                meaningful_name    = $virusTotalResult.data.attributes.meaningful_name
+                type_description   = $virusTotalResult.data.attributes.type_description
+                last_analysis_date = (Get-Date 01.01.1970) + ([System.TimeSpan]::fromseconds($virusTotalResult.data.attributes.last_analysis_date))
+                harmless           = $virusTotalResult.data.attributes.last_analysis_stats.harmless
+                malicious          = $virusTotalResult.data.attributes.last_analysis_stats.malicious
+                suspicious         = $virusTotalResult.data.attributes.last_analysis_stats.suspicious
+                undetected         = $virusTotalResult.data.attributes.last_analysis_stats.undetected
+                sha256             = $virusTotalResult.data.attributes.sha256
+                sha1               = $virusTotalResult.data.attributes.sha1
+                md5                = $virusTotalResult.data.attributes.md5
+                fileSizeKB         = ($virusTotalResult.data.attributes.size / 1KB)                
+            }            
+        }
+        $file_hash_report += $filehash_report        
     }
-    catch {
-        Write-Host "$($_.Exception.Message) - please check if VT address is correct or you have valid API key" -BackgroundColor DarkRed
-        break
-    }
+    return $file_hash_report
 }
+
 
 #======================= ======================= ==================#
 #Clear-Host
