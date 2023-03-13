@@ -10,7 +10,7 @@ function Get-VirusTotalCommands {
     2. Get-VirusTotalDomain
     3. Get-VirusTotalUrl
     4. Submit-VirusTotalUrl
-    5. Get-VirusTotalFile"
+    5. Get-VirusTotalFileHash"
 
     Write-Host "
     You must Sign in to Virus Total to get your FREE API Key" -ForegroundColor Red
@@ -27,7 +27,7 @@ function Get-VirusTotalCommands {
     Get-Help Get-VirusTotalDomain -Examples
     Get-Help Get-VirusTotalUrl -Examples
     Get-Help Submit-VirusTotalUrl -Examples
-    Get-Help Get-VirusTotalFile -Examples"
+    Get-Help Get-VirusTotalFileHash -Examples"
     Write-Host " "
     Write-Host "================= Created by Haridas Vhadade - 24-Jan-2023 ================="
     Write-Host " "
@@ -438,7 +438,7 @@ https://yahoo.com
 }
 
 #============================== Get VirusTotal File ==============================#
-function Get-VirusTotalFile {
+function Get-VirusTotalFileHash {
     <#
 .SYNOPSIS
 Get File Reputation Details from Virus Total Site
@@ -448,10 +448,10 @@ Created by Haridas Vhadade.
 Date - 19-Jan-2023
 
 .Example
-Get-VirusTotalFile -VT_APIKEY "xkksdfkskxkdjkld" -FileHash "sdfasdfasd34534fsdf"
+Get-VirusTotalFileHash -VT_APIKEY "xkksdfkskxkdjkld" -FileHash "sdfasdfasd34534fsdf"
 
 .Example
-Get-VirusTotalFile -VT_APIKEY "xkksdfkskxkdjkld" -FileHash_list c:\temp\FileHash_list.txt
+Get-VirusTotalFileHash -VT_APIKEY "xkksdfkskxkdjkld" -FileHash_list c:\temp\FileHash_list.txt
 
 Create a text file with One IP at each line and save it. e.g.
 sdfasdfasd34534fsdfsdtfhg
@@ -459,7 +459,7 @@ sdfasdfasd34534fsdfsdfasd
 
 .Example
 Get File reputation from Virus Total and save report to file.
-Get-VirusTotalFile -VT_APIKEY "xkksdfkskxkdjkld" -FileHash_list c:\temp\FileHash_list.txt | Export-Csv -NoTypeInformation -Path c:\temp\ip_report.csv
+Get-VirusTotalFileHash -VT_APIKEY "xkksdfkskxkdjkld" -FileHash_list c:\temp\FileHash_list.txt | Export-Csv -NoTypeInformation -Path c:\temp\ip_report.csv
 
 #>
     [CmdletBinding()]
